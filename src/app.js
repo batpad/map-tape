@@ -2,11 +2,11 @@ const mapboxgl = require('mapbox-gl');
 const config = require('./config');
 const turf = require('@turf/turf');
 
-mapboxgl.accessToken = 'pk.eyJ1Ijoic2FuamF5YiIsImEiOiJjaWcwcHc1dGIwZXBudHJrd2t5YjI3Z3VyIn0.j_6dWw8HvH5RtZrMBqbP1Q';
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VvaGFja2VyIiwiYSI6ImFIN0hENW8ifQ.GGpH9gLyEg0PZf3NPQ7Vrg';
 
 const padMap = window.padMap = new mapboxgl.Map({
     container: 'map', // container id
-    style: 'mapbox://styles/mapbox/streets-v8', //stylesheet location
+    style: 'mapbox://styles/geohacker/cj6hcmopz48qw2rpgjidmby7k', //stylesheet location
     center: [72.828002, 18.963406],
     hash: true,
     zoom: 16 // starting zoom
@@ -15,12 +15,6 @@ const padMap = window.padMap = new mapboxgl.Map({
 padMap.on('load', () => {
 	fetchGeoJSON()
 		.then(geojson => {
-			const $video = document.getElementById('video');
-			$video.src = config.videoUrl;
-			$video.addEventListener('loadedmetadata', () => {
-				console.log('loaded event metadata');
-			});
-			console.log('geojson', geojson);
 			const lineString = makeLineString(geojson);
 			const bbox = turf.bbox(lineString);
 			padMap.fitBounds(bbox);
@@ -37,6 +31,31 @@ padMap.on('load', () => {
 					'line-width': 5
 				}
 			});
+            padMap.addSource('current', {
+                type: 'geojson',
+                data: geojson.features[0]
+            });
+            padMap.addLayer({
+                id: 'current-layer',
+                source: 'current',
+                type: 'symbol',
+                layout: {
+                    'icon-image': 'car',
+                    'icon-size': 0.3
+                }
+            });
+
+			const $video = document.getElementById('video');
+			$video.src = config.videoUrl;
+			$video.addEventListener('loadedmetadata', () => {
+				console.log('loaded event metadata');
+			});
+			$video.addEventListener('timeupdate', () => {
+				const time = $video.currentTime;
+				const point = getPointFromTime(time, geojson);
+                padMap.getSource('current').setData(point);
+			});
+			console.log('geojson', geojson);
 		});
 });
 
@@ -55,4 +74,10 @@ function makeLineString(fc) {
 			coordinates: fc.features.map(feature => feature.geometry.coordinates)
 		}
 	};
+}
+
+function getPointFromTime(time, geojson) {
+	console.log('time', time);
+	const frameNo = Math.floor(time * 25);
+	return geojson.features[frameNo];
 }
