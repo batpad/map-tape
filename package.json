@@ -1,0 +1,29 @@
+{
+  "name": "map-tape",
+  "version": "0.0.1",
+  "description": "Get on the road, roll the tape",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/batpad/map-tape.git"
+  },
+  "author": "",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/batpad/map-tape/issues"
+  },
+  "homepage": "https://github.com/batpad/map-tape#readme",
+  "devDependencies": {
+    "webpack": "^4.0.1",
+    "webpack-cli": "^2.0.9",
+    "webpack-dev-server": "^3.0.0"
+  },
+  "dependencies": {
+    "@turf/turf": "^5.1.6",
+    "mapbox-gl": "^0.44.1"
+  }
+}
