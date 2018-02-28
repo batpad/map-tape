@@ -1,7 +1,6 @@
 const mapboxgl = require('mapbox-gl');
 const config = require('./config');
-const turf = require('@turf/turf');
-
+const turfBBox = require('@turf/bbox').default; // no idea why the default is needed really, but it is
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VvaGFja2VyIiwiYSI6ImFIN0hENW8ifQ.GGpH9gLyEg0PZf3NPQ7Vrg';
 
 const padMap = window.padMap = new mapboxgl.Map({
@@ -16,7 +15,7 @@ padMap.on('load', () => {
 	fetchGeoJSON()
 		.then(geojson => {
 			const lineString = makeLineString(geojson);
-			const bbox = turf.bbox(lineString);
+			const bbox = turfBBox(lineString);
 			padMap.fitBounds(bbox);
 			padMap.addSource('roadline', {
 				type: 'geojson',
@@ -43,6 +42,10 @@ padMap.on('load', () => {
                     'icon-image': 'car',
                     'icon-size': 0.3
                 }
+            });
+
+            padMap.on('mouseenter', 'current-layer', () => {
+                console.log('entered current-layer');
             });
 
 			const $video = document.getElementById('video');

@@ -3,5 +3,7 @@ module.exports = {
     output: {
         filename: './dist/bundle.js'
     },
-     watch: true
-}
+    watch: true,
+    // devtool: 'source-map',
+    mode: 'development'
+};
