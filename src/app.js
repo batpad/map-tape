@@ -1,6 +1,8 @@
 const mapboxgl = require('mapbox-gl');
 const config = require('./config');
 const turfBBox = require('@turf/bbox').default; // no idea why the default is needed really, but it is
+const turfNearestPointOnLine = require('@turf/nearest-point-on-line').default;
+const turfNearestPoint = require('@turf/nearest-point').default;
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VvaGFja2VyIiwiYSI6ImFIN0hENW8ifQ.GGpH9gLyEg0PZf3NPQ7Vrg';
 
 const padMap = window.padMap = new mapboxgl.Map({
@@ -14,6 +16,12 @@ const padMap = window.padMap = new mapboxgl.Map({
 padMap.on('load', () => {
 	fetchGeoJSON()
 		.then(geojson => {
+            let i = 0;
+            geojson.features = geojson.features.map(feature => {
+                feature.properties.sequence = i;
+                i++;
+                return feature;
+            });
 			const lineString = makeLineString(geojson);
 			const bbox = turfBBox(lineString);
 			padMap.fitBounds(bbox);
@@ -44,10 +52,6 @@ padMap.on('load', () => {
                 }
             });
 
-            padMap.on('mouseenter', 'current-layer', () => {
-                console.log('entered current-layer');
-            });
-
 			const $video = document.getElementById('video');
 			$video.src = config.videoUrl;
 			$video.addEventListener('loadedmetadata', () => {
@@ -58,7 +62,16 @@ padMap.on('load', () => {
 				const point = getPointFromTime(time, geojson);
                 padMap.getSource('current').setData(point);
 			});
-			console.log('geojson', geojson);
+
+            padMap.on('click', (e) => {
+                $video.pause();
+                const pt = e.lngLat;
+                const pointOnLine = getClosestPoint(pt, lineString);
+                padMap.getSource('current').setData(pointOnLine);
+                const newTime = getTimecodeFromPoint(pointOnLine, geojson);
+                $video.currentTime = newTime;
+                $video.play();
+            });
 		});
 });
 
@@ -79,8 +92,24 @@ function makeLineString(fc) {
 	};
 }
 
+function getClosestPoint(pt, lineString) {
+    const ptFeature = {
+        type: 'Feature',
+        geometry: {
+            type: 'Point',
+            coordinates: [pt.lng, pt.lat]
+        }
+    };
+    return turfNearestPointOnLine(lineString, ptFeature);
+}
+
 function getPointFromTime(time, geojson) {
-	console.log('time', time);
 	const frameNo = Math.floor(time * 25);
 	return geojson.features[frameNo];
+}
+
+function getTimecodeFromPoint(pt, geojson) {
+    const nearestPoint = turfNearestPoint(pt, geojson);
+    const seq = nearestPoint.properties.sequence;
+    return seq / 25;
 }
