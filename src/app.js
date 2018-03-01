@@ -64,13 +64,17 @@ padMap.on('load', () => {
 			});
 
             padMap.on('click', (e) => {
-                $video.pause();
+                let isPlaying = false;
+                if (!$video.paused) {
+                    isPlaying = true;
+                    $video.pause();
+                }
                 const pt = e.lngLat;
                 const pointOnLine = getClosestPoint(pt, lineString);
                 padMap.getSource('current').setData(pointOnLine);
                 const newTime = getTimecodeFromPoint(pointOnLine, geojson);
                 $video.currentTime = newTime;
-                $video.play();
+                if (isPlaying) $video.play();
             });
 		});
 });
