@@ -3,6 +3,7 @@ const config = require('./config');
 const turfBBox = require('@turf/bbox').default; // no idea why the default is needed really, but it is
 const turfNearestPointOnLine = require('@turf/nearest-point-on-line').default;
 const turfNearestPoint = require('@turf/nearest-point').default;
+const turfBearing = require('@turf/bearing').default;
 mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VvaGFja2VyIiwiYSI6ImFIN0hENW8ifQ.GGpH9gLyEg0PZf3NPQ7Vrg';
 
 const padMap = window.padMap = new mapboxgl.Map({
@@ -60,6 +61,14 @@ padMap.on('load', () => {
 			$video.addEventListener('timeupdate', () => {
 				const time = $video.currentTime;
 				const point = getPointFromTime(time, geojson);
+                const center = point.geometry.coordinates;
+                const bearing = turfBearing(point, geojson.features[point.properties.sequence + 1]);
+                padMap.flyTo({
+                    center: center,
+                    bearing: bearing,
+                    pitch: 60,
+                    zoom: 16
+                });
                 padMap.getSource('current').setData(point);
 			});
 
