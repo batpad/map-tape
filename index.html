@@ -35,7 +35,13 @@ body, html {
 		<div id="map"></div>
 		<div id="right">
 		
-			<video id="video" src="" controls>	
+			<video id="video" src="" controls></video>
+			<div class="range">
+				<label for="playbackSpeed">
+					Video Speed:
+				</label>
+				<input type="range" id="playbackSpeed" value="1" min="0" max="1" step="any" />
+			</div>
 
 		</div>
 		<script src="./dist/bundle.js"></script>
