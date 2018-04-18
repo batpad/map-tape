@@ -76,6 +76,12 @@ padMap.on('load', () => {
                 $video.currentTime = newTime;
                 if (isPlaying) $video.play();
             });
+
+            document.getElementById('playbackSpeed').addEventListener('input', function() {
+                const newRate = this.value
+                console.log('new rate', newRate)
+                $video.playbackRate = parseFloat(newRate)
+            });
 		});
 });
 
